@@ -8,7 +8,7 @@ public class Wood3 {
 
     private final Rabbit4 rabbit;
 
-    @Autowired
+    @Autowired //через конструктор
     public Wood3(Rabbit4 rabbit) {
         this.rabbit = rabbit;
     }

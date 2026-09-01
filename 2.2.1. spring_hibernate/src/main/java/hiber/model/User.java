@@ -16,11 +16,8 @@ public class User {
    @Column(name = "last_name")
    private String lastName;
 
-   @Column(name = "email")
    private String email;
-
-   // ////////////////////
-   @OneToOne (cascade = CascadeType.ALL)//применить все операции такие же как и user
+   @OneToOne (cascade = CascadeType.ALL)
    @JoinColumn(name = "car_id")
    private Car car;
 
@@ -31,8 +28,6 @@ public class User {
    public void setCar(Car car) {
       this.car = car;
    }
-
-   // /////////////////////
 
    public User() {}
    
@@ -78,5 +73,10 @@ public class User {
 
    public void setEmail(String email) {
       this.email = email;
+   }
+
+
+   public String toString() {
+      return "id'" + id + "', firstname=" + firstName + ", lastname=" + lastName + ", email=" + email;
    }
 }

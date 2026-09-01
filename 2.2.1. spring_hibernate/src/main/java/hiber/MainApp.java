@@ -31,7 +31,9 @@ public class MainApp {
          System.out.println();
       }
 
-      userService.deleteUsers();
+      User test = userService.getUserByCar("BMW", 4);
+      System.out.println(test.toString());
+
       context.close();
    }
 }

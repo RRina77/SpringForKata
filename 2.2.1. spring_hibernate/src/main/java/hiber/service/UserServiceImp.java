@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service //означает что это сервисный класс
+@Service
 public class UserServiceImp implements UserService {
 
    @Autowired
@@ -28,13 +28,8 @@ public class UserServiceImp implements UserService {
 
    @Transactional(readOnly = true)
    @Override
-   public User catchUser(String model, int series) {
-      return userDao.catchUser(model, series);
+   public User getUserByCar(String model, int series) {
+      return userDao.getUserByCar(model, series);
    }
 
-   @Transactional
-   @Override
-   public void deleteUsers() {
-      userDao.deleteUsers();
-   }
 }

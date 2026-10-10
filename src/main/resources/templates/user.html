@@ -6,6 +6,16 @@
 <body>
 <h1>User, welcome spring boot security page!</h1>
 
+<div>
+    <p>Username: <span th:text="${user.username}"></span></p> <!--user.username - класс User -->
 
+    <p>Roles:
+        <span th:each="role : ${user.roles}"
+              th:text="${role.name} + ' '"></span> <!--вывод названия каждой роли-->
+    </p>
+</div>
+<form th:action="@{/logout}" method="post"> <!--адрес выхода -->
+    <button type="submit">Выйти</button>
+</form>
 </body>
 </html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора</title>
+</head>
+<body>
+
+<h1>Панель администратора</h1>
+
+<h2>Информация об администраторе</h2>
+
+<p>
+    Имя пользователя:
+    <span th:text="${user.username}"></span>
+</p>
+
+<p>
+    Роли:
+    <span th:each="role : ${user.roles}"
+          th:text="${role.name} + ' '"></span>
+</p>
+
+<h2>Список пользователей</h2>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Имя пользователя</th>
+        <th>Роли</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="u : ${users}">
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.username}"></td>
+        <td>
+                <span th:each="role : ${u.roles}"
+                      th:text="${role.name} + ' '"></span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Выйти</button>
+</form>
+
+</body>
+</html>

@@ -11,13 +11,15 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String username;
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -37,22 +39,22 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() { //не истёк ли срок действия аккаунта
+    public boolean isAccountNonExpired() { // не истёк ли срок действия аккаунта
         return true;
     }
 
     @Override
-    public boolean isAccountNonLocked() { //не заблокирован ли аккаунт
+    public boolean isAccountNonLocked() { // не заблокирован ли аккаунт
         return true;
     }
 
     @Override
-    public boolean isCredentialsNonExpired() { //не истёк ли срок действия пароля
+    public boolean isCredentialsNonExpired() { // не истёк ли срок действия пароля
         return true;
     }
 
     @Override
-    public boolean isEnabled() { //активен ли аккаунт
+    public boolean isEnabled() { // активен ли аккаунт
         return true;
     }
 
@@ -61,10 +63,12 @@ public class User implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { //какие роли есть у пользователя
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // какие роли есть у пользователя
         return roles;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -79,5 +83,24 @@ public class User implements UserDetails {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof User)) {
+            return false;
+        }
+
+        User user = (User) o;
+        return id != 0 && id == user.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return User.class.hashCode();
     }
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователь</title>
+</head>
+<body>
+
+<h1 th:text="${editing} ? 'Редактирование пользователя' : 'Создание пользователя'">
+    Пользователь
+</h1>
+
+<p th:if="${error}" th:text="${error}" style="color: red;"></p>
+
+<form th:object="${user}"
+      th:action="${editing} ? @{/admin/{id}(id=${userId})} : @{/admin}"
+      method="post">
+
+    <input type="hidden"
+           th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}">
+
+    <p>
+        <label for="username">Имя пользователя:</label>
+        <input id="username" type="text"
+               th:field="*{username}" required>
+    </p>
+
+    <p>
+        <label for="password">Пароль:</label>
+        <input id="password" type="password"
+               name="password"
+               th:required="${!editing}"
+               autocomplete="new-password">
+    </p>
+
+    <p th:if="${editing}">
+        Оставь пароль пустым, если не хочешь его менять.
+    </p>
+
+    <p>Роли:</p>
+
+    <div th:each="role : ${roles}">
+        <label>
+            <input type="checkbox"
+                   name="roleIds"
+                   th:value="${role.id}"
+                   th:checked="${selectedRoleIds.contains(role.id)}">
+            <span th:text="${role.name}">ROLE_USER</span>
+        </label>
+    </div>
+
+    <p>
+        <button type="submit">Сохранить</button>
+    </p>
+</form>
+
+<p><a th:href="@{/admin}">Вернуться к списку пользователей</a></p>
+
+</body>
+</html>

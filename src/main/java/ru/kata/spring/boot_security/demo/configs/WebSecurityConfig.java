@@ -13,10 +13,13 @@ import ru.kata.spring.boot_security.demo.services.UserService;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
     private final SuccessUserHandler successUserHandler;
     private final UserService userService;
 
-    public WebSecurityConfig(SuccessUserHandler successUserHandler, UserService userService) {
+    public WebSecurityConfig(
+            SuccessUserHandler successUserHandler,
+            UserService userService) {
         this.successUserHandler = successUserHandler;
         this.userService = userService;
     }
@@ -32,15 +35,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/", "/index").permitAll()
-                .antMatchers("/admin/**").hasRole("ADMIN") //все адреса, начинающиеся с /admin/ доступны только администраторам
-                .antMatchers("/user").hasAnyRole("USER", "ADMIN") //тоже самое
-                .anyRequest().authenticated() //остальные адреса требуют входа
+                .antMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                .antMatchers("/user").hasAnyRole("USER", "ADMIN")
+                .anyRequest().authenticated()
                 .and()
-                .formLogin().successHandler(successUserHandler)//Авторизация через форму
-                .permitAll()//Разрешаем страницу логина всем
+                .formLogin()
+                .successHandler(successUserHandler)
+                .permitAll()
                 .and()
                 .logout()
-                .permitAll(); //Logout доступен всем
+                .permitAll();
     }
 
     @Bean

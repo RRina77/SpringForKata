@@ -5,12 +5,35 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.kata.spring.boot_security.demo.models.User;
+import ru.kata.spring.boot_security.demo.services.UserService;
+
+import java.util.List;
 
 @Controller
 public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping("/user")
-    public  String userPage(@AuthenticationPrincipal User user, Model model) { //@AuthenticationPrincipal получает объект текущего пользователя
-        model.addAttribute("user", user); //передаёт пользователя в шаблон под именем user
-        return "user"; //user.html возвращает
+    public String userPage(@AuthenticationPrincipal User currentUser,
+                           Model model) {
+
+        model.addAttribute("currentUser", currentUser);
+
+        if (currentUser.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"))) {
+
+            model.addAttribute("users", userService.listUsers());
+
+        } else {
+            model.addAttribute("users", List.of(currentUser));
+        }
+
+        return "user";
     }
 }

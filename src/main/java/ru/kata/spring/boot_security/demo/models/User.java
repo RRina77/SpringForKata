@@ -15,8 +15,10 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    private String username;
+    private String firstName;
+    private String lastName;
+    private int age;
+    private String email;
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -32,10 +34,6 @@ public class User implements UserDetails {
 
     public int getId() {
         return id;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     @Override
@@ -56,10 +54,6 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { // активен ли аккаунт
         return true;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     @Override
@@ -103,4 +97,42 @@ public class User implements UserDetails {
     public int hashCode() {
         return User.class.hashCode();
     }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
 }

@@ -3,60 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <title>Пользователь</title>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
+<!-- Верхняя панель -->
+<nav class="navbar navbar-dark bg-dark">
+    <span class="navbar-text text-white">
+        <strong th:text="${currentUser.email}"></strong>
+        <span th:each="role : ${currentUser.roles}"
+              th:text="${role.name + ' '}"></span>
+    </span>
 
-<h1 th:text="${editing} ? 'Редактирование пользователя' : 'Создание пользователя'">
-    Пользователь
-</h1>
+    <form th:action="@{/logout}" method="post" class="mb-0">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+        <button type="submit"
+                class="btn btn-link text-secondary">
+            Logout
+        </button>
+    </form>
+</nav>
+<!-- Левая панель -->
+<div class="container-fluid">
+    <div class="row mt-3">
+        <div class="col-2 mt-3">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/admin}">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/user}">User</a>
+                </li>
+            </ul>
+        </div>
 
-<p th:if="${error}" th:text="${error}" style="color: red;"></p>
+        <!-- Основная панель -->
+        <div class="col-10">
+            <h1 class="mt-3">Admin Panel</h1>
 
-<form th:object="${user}"
-      th:action="${editing} ? @{/admin/{id}(id=${userId})} : @{/admin}"
-      method="post">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin}">
+                        Users table
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/admin/new}">
+                        New User
+                    </a>
+                </li>
+            </ul>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Add new user</h5>
+                </div>
 
-    <input type="hidden"
-           th:if="${_csrf != null}"
-           th:name="${_csrf.parameterName}"
-           th:value="${_csrf.token}">
+                <div class="card-body">
+                    <p th:if="${error}" th:text="${error}" style="color: red;"></p>
 
-    <p>
-        <label for="username">Имя пользователя:</label>
-        <input id="username" type="text"
-               th:field="*{username}" required>
-    </p>
+                    <form th:object="${user}"
+                          th:action="${editing} ? @{/admin/{id}(id=${userId})} : @{/admin}"
+                          method="post">
 
-    <p>
-        <label for="password">Пароль:</label>
-        <input id="password" type="password"
-               name="password"
-               th:required="${!editing}"
-               autocomplete="new-password">
-    </p>
+                        <input type="hidden"
+                               th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
 
-    <p th:if="${editing}">
-        Оставь пароль пустым, если не хочешь его менять.
-    </p>
+                        <div class="form-group text-center">
+                            <label for="firstName"><strong>First name</strong></label>
+                            <input id="firstName" type="text"
+                                   class="form-control mx-auto"
+                                   style="width: 300px;"
+                                   th:field="*{firstName}" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="lastName"><strong>Last name</strong></label>
+                            <input id="lastName" type="text"
+                                   class="form-control mx-auto"
+                                   style="width: 300px;"
+                                   th:field="*{lastName}" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="age"><strong>Age</strong></label>
+                            <input id="age" type="number"
+                                   class="form-control mx-auto"
+                                   style="width: 300px;"
+                                   th:field="*{age}" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="email"><strong>Email</strong></label>
+                            <input id="email" type="email"
+                                   class="form-control mx-auto"
+                                   style="width: 300px;"
+                                   th:field="*{email}" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="password"><strong>Password</strong></label>
+                            <input id="password" type="password"
+                                   class="form-control mx-auto"
+                                   style="width: 300px;"
+                                   th:field="*{password}" required>
+                        </div>
 
-    <p>Роли:</p>
+                        <!-- Выбор Доступа -->
+                        <div class="form-group text-center">
+                            <label for="roles"><strong>Role</strong></label>
 
-    <div th:each="role : ${roles}">
-        <label>
-            <input type="checkbox"
-                   name="roleIds"
-                   th:value="${role.id}"
-                   th:checked="${selectedRoleIds.contains(role.id)}">
-            <span th:text="${role.name}">ROLE_USER</span>
-        </label>
+                            <select id="roles"
+                                    name="roleIds"
+                                    class="form-control mx-auto"
+                                    style="width: 200px;"
+                                    multiple
+                                    size="2">
+
+                                <option th:each="role : ${roles}"
+                                        th:value="${role.id}"
+                                        th:text="${role.name}"
+                                        th:selected="${selectedRoleIds.contains(role.id)}">
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <button type="submit"  class="btn btn-success">
+                                Add new user
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <p>
-        <button type="submit">Сохранить</button>
-    </p>
-</form>
-
-<p><a th:href="@{/admin}">Вернуться к списку пользователей</a></p>
+</div>
 
 </body>
 </html>

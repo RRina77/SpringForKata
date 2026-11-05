@@ -27,11 +27,14 @@ public class AdminController {
                             Model model) {
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("users", userService.listUsers());
+        model.addAttribute("roles", userService.listRoles());
         return "admin";
     }
 
     @GetMapping("/new")
-    public String newUserForm(Model model) {
+    public String newUserForm(@AuthenticationPrincipal User currentUser,
+                              Model model) {
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("user", new User());
         model.addAttribute("roles", userService.listRoles());
         model.addAttribute("selectedRoleIds", Collections.emptySet());
@@ -42,6 +45,7 @@ public class AdminController {
     @PostMapping
     public String createUser(
             @ModelAttribute("user") User user,
+            @AuthenticationPrincipal User currentUser,
             @RequestParam(value = "roleIds", required = false)
             Set<Integer> roleIds,
             Model model) {
@@ -50,7 +54,9 @@ public class AdminController {
             userService.createUser(user, roleIds);
             return "redirect:/admin";
         } catch (IllegalArgumentException exception) {
+            model.addAttribute("user", user);
             model.addAttribute("roles", userService.listRoles());
+            model.addAttribute("currentUser", currentUser);
             model.addAttribute(
                     "selectedRoleIds",
                     roleIds == null ? Collections.emptySet() : roleIds
@@ -81,6 +87,7 @@ public class AdminController {
 
     @PostMapping("/{id}")
     public String updateUser(
+            @AuthenticationPrincipal User currentUser,
             @PathVariable int id,
             @ModelAttribute("user") User user,
             @RequestParam(value = "roleIds", required = false)
@@ -92,6 +99,7 @@ public class AdminController {
             return "redirect:/admin";
         } catch (IllegalArgumentException exception) {
             model.addAttribute("userId", id);
+            model.addAttribute("currentUser", currentUser);
             model.addAttribute("roles", userService.listRoles());
             model.addAttribute(
                     "selectedRoleIds",

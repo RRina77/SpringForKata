@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByEmail(username);
 
         if (user == null) {
             throw new UsernameNotFoundException(
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public void createUser(User user, Set<Integer> roleIds) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+        if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new IllegalArgumentException(
                     "Пользователь с таким именем уже существует"
             );
@@ -87,8 +87,8 @@ public class UserServiceImpl implements UserService {
     public void updateUser(int id, User formUser, Set<Integer> roleIds) {
         User existingUser = getUserById(id);
 
-        User sameNameUser = userRepository.findByUsername(
-                formUser.getUsername()
+        User sameNameUser = userRepository.findByEmail(
+                formUser.getEmail()
         );
 
         if (sameNameUser != null && sameNameUser.getId() != id) {
@@ -97,7 +97,10 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        existingUser.setUsername(formUser.getUsername());
+        existingUser.setFirstName(formUser.getFirstName());
+        existingUser.setLastName(formUser.getLastName());
+        existingUser.setAge(formUser.getAge());
+        existingUser.setEmail(formUser.getEmail());
 
         if (formUser.getPassword() != null
                 && !formUser.getPassword().isBlank()) {

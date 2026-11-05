@@ -26,22 +26,22 @@ public class DatabaseInitializer {
 
     @PostConstruct
     public void init() {
-        if (userRepository.findByUsername("admin") == null) {
+        if (userRepository.findByEmail("admin") == null) {
             Role adminRole = roleRepository.findByName("ROLE_ADMIN");
 
             User admin = new User();
-            admin.setUsername("admin");
+            admin.setEmail("admin");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.getRoles().add(adminRole);
 
             userRepository.save(admin);
         }
 
-        if (userRepository.findByUsername("user") == null) {
+        if (userRepository.findByEmail("user") == null) {
             Role userRole = roleRepository.findByName("ROLE_USER");
 
             User user = new User();
-            user.setUsername("user");
+            user.setEmail("user");
             user.setPassword(passwordEncoder.encode("user123"));
             user.getRoles().add(userRole);
 

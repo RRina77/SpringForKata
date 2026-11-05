@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     @EntityGraph(attributePaths = "roles")
-    User findByUsername(String username);
+    User findByEmail(String username);
 
     @Override
     @EntityGraph(attributePaths = "roles")
@@ -18,4 +18,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @EntityGraph(attributePaths = "roles")
     Optional<User> findWithRolesById(Integer id);
+
 }

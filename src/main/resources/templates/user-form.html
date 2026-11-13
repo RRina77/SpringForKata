@@ -2,6 +2,10 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <!-- CSRF-токен -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
     <title>Пользователь</title>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -63,9 +67,7 @@
                 <div class="card-body">
                     <p th:if="${error}" th:text="${error}" style="color: red;"></p>
 
-                    <form th:object="${user}"
-                          th:action="${editing} ? @{/admin/{id}(id=${userId})} : @{/admin}"
-                          method="post">
+                    <form id="userForm" th:object="${user}" method="post">
 
                         <input type="hidden"
                                th:if="${_csrf != null}"
@@ -139,6 +141,55 @@
         </div>
     </div>
 </div>
+<script>
+    //создание пользователя через Java Script
+    const form = document.getElementById('userForm');
 
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const user = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            age: Number(document.getElementById('age').value),
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            roleIds: Array.from(document.getElementById('roles').selectedOptions)
+                .map(option => Number(option.value))
+        };
+        //Получаем CSRF-токен. JavaScript находит meta-теги в HTML и считывает их содержимое
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+         //Отправление POST-запроса на адрес UserRestController
+         fetch('/api/users', {
+             method: 'POST',
+             //Передаются заголовки (первый - JSON, второй - CSRF-токен)
+             headers: {
+             'Content-Type': 'application/json',
+             [csrfHeader]: csrfToken
+         },
+         //Преобразуется JavaScript-объект user в JSON-строку и отправляется серверу
+         body: JSON.stringify(user)
+         })
+         //response.ok проверяет, успешен ли HTTP-ответ (статус от 200 до 299)
+         .then(async response => {
+    const responseBody = await response.text();
+
+    console.log('HTTP Status:', response.status);
+    console.log('Response:', responseBody);
+
+    if (response.ok) {
+        alert('Пользователь успешно создан!');
+    } else {
+        alert('Ошибка! HTTP Status: ' + response.status);
+    }
+})
+    //просто обработка ошибок
+         .catch(error => {
+            console.error('Ошибка:', error);
+         });
+    });
+</script>
 </body>
 </html>

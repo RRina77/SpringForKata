@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!-- Специальный защитный токен для JavaScript -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <meta charset="UTF-8">
     <title>Admin Panel</title>
     <link rel="stylesheet"
@@ -69,36 +72,8 @@
                     <th>Delete</th>
                 </tr>
                 </thead>
-
-
-                <tbody>
-                <tr th:each="u : ${users}">
-                    <td th:text="${u.id}"></td>
-                    <td th:text="${u.firstName}"></td>
-                    <td th:text="${u.lastName}"></td>
-                    <td th:text="${u.age}"></td>
-                    <td th:text="${u.email}"></td>
-                    <td>
-            <span th:each="role : ${u.roles}"
-                  th:text="${role.name + ' '}"></span>
-                    </td>
-                    <td>
-                        <button type="button"
-                                class="btn btn-info btn-sm"
-                                data-toggle="modal"
-                                th:attr="data-target='#editModal-' + ${u.id}">
-                            Edit
-                        </button>
-                    </td>
-                    <td>
-                        <button type="button"
-                                class="btn btn-danger btn-sm"
-                                data-toggle="modal"
-                                th:attr="data-target='#deleteModal-' + ${u.id}">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
+                <!-- таблица находится в конце в скрипте-->
+                <tbody id="usersTableBody">
                 </tbody>
             </table>
             <!-- Окна редактирования пользователей -->
@@ -119,7 +94,8 @@
                             </button>
                         </div>
 
-                        <form th:action="@{/admin/{id}(id=${u.id})}"
+                        <form class="editUserForm"
+                              th:attr="data-user-id=${u.id}"
                               method="post">
 
                             <div class="modal-body">
@@ -181,10 +157,9 @@
 
                                 <!-- Выбор Доступа -->
                                 <div class="form-group text-center">
-                                    <label for="roles"><strong>Role</strong></label>
+                                    <label><strong>Role</strong></label>
 
-                                    <select id="roles"
-                                            name="roleIds"
+                                    <select name="roleIds"
                                             class="form-control mx-auto"
                                             style="width: 200px;"
                                             multiple
@@ -325,5 +300,123 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+console.log(csrfToken);
+console.log(csrfHeader);
+</script>
+
+<!-- Скрипт основной таблицы/окна редактирования/окна удаления -->
+<script>
+    function loadUsers() {
+        fetch('/api/users')
+            .then(response => response.json())
+            .then(users => {
+                const tbody = document.getElementById('usersTableBody');
+
+                tbody.innerHTML = '';
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.firstName ?? ''}</td>
+                        <td>${user.lastName ?? ''}</td>
+                        <td>${user.age}</td>
+                        <td>${user.email}</td>
+                        <td>${user.roles.join(', ')}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm"
+                               onclick="editUser(${user.id})">
+                               Edit
+                             </button>
+                        </td>
+                        <td>
+                           <button class="btn btn-danger btn-sm"
+                              onclick="deleteUser(${user.id})">
+                              Delete
+                           </button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+            });
+    }
+
+    loadUsers();
+    //редактирование пользователя
+    function editUser(id) {
+    $('#editModal-' + id).modal('show');
+    }
+
+    function deleteUser(id) {
+    if (!confirm('Вы действительно хотите удалить пользователя?')) {
+        return;
+    }
+
+    fetch('/api/users/' + id, {
+        method: 'DELETE',
+        headers: {
+            [csrfHeader]: csrfToken
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Пользователь успешно удалён!');
+            loadUsers();
+        } else {
+            alert('Ошибка удаления. HTTP Status: ' + response.status);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+    });
+    }
+     // Обработчик отправки форм редактирования
+     document.querySelectorAll('.editUserForm').forEach(form => {
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const id = this.dataset.userId;
+
+        const user = {
+            firstName: this.elements.namedItem('firstName').value,
+            lastName: this.elements.namedItem('lastName').value,
+            age: Number(this.elements.namedItem('age').value),
+            email: this.elements.namedItem('email').value,
+            password: this.elements.namedItem('password').value,
+            roleIds: Array.from(
+                this.querySelectorAll('select[name="roleIds"] option:checked')
+            ).map(option => Number(option.value))
+        };
+
+        fetch('/api/users/' + id, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(user)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Пользователь успешно обновлён!');
+                loadUsers();
+                $(this.closest('.modal')).modal('hide');
+            } else {
+                alert('Ошибка обновления. HTTP Status: ' + response.status);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    });
+});
+</script>
 </body>
 </html>
